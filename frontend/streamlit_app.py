@@ -176,7 +176,29 @@ p, span, div, li {{ font-family: 'Inter', system-ui, sans-serif !important; }}
 /* ─── Hide Default Streamlit Elements ─── */
 #MainMenu {{ visibility: hidden; }}
 footer {{ visibility: hidden; }}
-header[data-testid="stHeader"] {{ background: transparent !important; }}
+header[data-testid="stHeader"] {{ background: var(--bg-main) !important; }}
+
+/* ─── Sidebar Collapse Button Fix ─── */
+button[data-testid="stSidebarCollapseButton"],
+button[data-testid="collapsedControl"] {{
+    color: #94A3B8 !important;
+    background: rgba(21,30,45,0.8) !important;
+    border: 1px solid rgba(148,163,184,0.10) !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+}}
+button[data-testid="stSidebarCollapseButton"]:hover,
+button[data-testid="collapsedControl"]:hover {{
+    color: #E2E8F0 !important;
+    background: rgba(56,189,248,0.08) !important;
+    border-color: rgba(56,189,248,0.25) !important;
+}}
+/* Ensure Material icons render correctly */
+button[data-testid="stSidebarCollapseButton"] span,
+button[data-testid="collapsedControl"] span {{
+    font-family: 'Material Symbols Rounded', 'Material Icons' !important;
+    -webkit-font-smoothing: antialiased !important;
+}}
 
 /* ─── Metric Cards ─── */
 div[data-testid="stMetric"] {{
@@ -313,10 +335,22 @@ button[data-testid="stTab"][aria-selected="true"] {{
     padding: 24px;
     margin-bottom: 16px;
     transition: all 0.25s ease;
+    box-sizing: border-box;
 }}
 .sq-card:hover {{
     border-color: rgba(56,189,248,0.15);
     box-shadow: 0 4px 30px rgba(0,0,0,0.2);
+}}
+/* Ensure columns holding KPI cards stretch equally */
+div[data-testid="stHorizontalBlock"] {{
+    align-items: stretch !important;
+}}
+div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {{
+    display: flex !important;
+    flex-direction: column !important;
+}}
+div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] > div {{
+    flex: 1 !important;
 }}
 
 /* ─── KPI Card ─── */
@@ -325,10 +359,17 @@ button[data-testid="stTab"][aria-selected="true"] {{
     backdrop-filter: blur(10px);
     border: 1px solid rgba(148,163,184,0.07);
     border-radius: 14px;
-    padding: 24px 20px;
+    padding: 20px 16px;
     text-align: center;
     position: relative;
     overflow: hidden;
+    min-height: 160px;
+    height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }}
 .kpi-card:hover {{
@@ -350,10 +391,10 @@ button[data-testid="stTab"][aria-selected="true"] {{
 .kpi-card.accent-amber::before {{ background: linear-gradient(90deg, transparent, #F59E0B, transparent); }}
 .kpi-card.accent-violet::before {{ background: linear-gradient(90deg, transparent, #8B5CF6, transparent); }}
 
-.kpi-icon {{ font-size: 1.5rem; margin-bottom: 8px; opacity: 0.7; }}
-.kpi-value {{ font-size: 2.2rem; font-weight: 800; color: #E2E8F0; line-height: 1.1; margin: 4px 0; }}
-.kpi-label {{ font-size: 0.78rem; font-weight: 600; color: #64748B; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }}
-.kpi-context {{ font-size: 0.75rem; color: #475569; margin-top: 4px; }}
+.kpi-icon {{ font-size: 1.3rem; margin-bottom: 4px; opacity: 0.7; flex-shrink: 0; }}
+.kpi-value {{ font-size: 1.9rem; font-weight: 800; color: #E2E8F0; line-height: 1.15; margin: 2px 0; white-space: nowrap; flex-shrink: 0; }}
+.kpi-label {{ font-size: 0.72rem; font-weight: 600; color: #64748B; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; flex-shrink: 0; }}
+.kpi-context {{ font-size: 0.7rem; color: #475569; margin-top: 2px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }}
 
 /* ─── AI Response Card ─── */
 .ai-response {{
