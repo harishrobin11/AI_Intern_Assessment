@@ -101,8 +101,9 @@ def plotly_layout(**overrides):
 # ---------------------------------------------------------------------------
 st.markdown(f"""
 <style>
-/* ─── Google Font ─── */
+/* ─── Google Font + Material Symbols ─── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
 /* ─── Root Variables ─── */
 :root {{
@@ -178,26 +179,56 @@ p, span, div, li {{ font-family: 'Inter', system-ui, sans-serif !important; }}
 footer {{ visibility: hidden; }}
 header[data-testid="stHeader"] {{ background: var(--bg-main) !important; }}
 
-/* ─── Sidebar Collapse Button Fix ─── */
+/* ─── Sidebar Collapse / Expand Button Fix ─── */
 button[data-testid="stSidebarCollapseButton"],
 button[data-testid="collapsedControl"] {{
-    color: #94A3B8 !important;
-    background: rgba(21,30,45,0.8) !important;
-    border: 1px solid rgba(148,163,184,0.10) !important;
+    background: rgba(21,30,45,0.9) !important;
+    border: 1px solid rgba(148,163,184,0.12) !important;
     border-radius: 8px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
     transition: all 0.2s ease !important;
+    z-index: 999 !important;
 }}
 button[data-testid="stSidebarCollapseButton"]:hover,
 button[data-testid="collapsedControl"]:hover {{
-    color: #E2E8F0 !important;
-    background: rgba(56,189,248,0.08) !important;
-    border-color: rgba(56,189,248,0.25) !important;
+    background: rgba(56,189,248,0.10) !important;
+    border-color: rgba(56,189,248,0.30) !important;
+    box-shadow: 0 0 12px rgba(56,189,248,0.12) !important;
 }}
-/* Ensure Material icons render correctly */
+/* Fix: hide the raw text icon name and replace with a proper symbol */
 button[data-testid="stSidebarCollapseButton"] span,
 button[data-testid="collapsedControl"] span {{
-    font-family: 'Material Symbols Rounded', 'Material Icons' !important;
+    font-family: 'Material Symbols Rounded' !important;
+    font-size: 20px !important;
+    color: #94A3B8 !important;
     -webkit-font-smoothing: antialiased !important;
+    font-feature-settings: 'liga' !important;
+}}
+button[data-testid="stSidebarCollapseButton"]:hover span,
+button[data-testid="collapsedControl"]:hover span {{
+    color: #E2E8F0 !important;
+}}
+/* Fallback: if icon font still fails, clip text and show a CSS arrow */
+@supports not (font-variation-settings: normal) {{
+    button[data-testid="stSidebarCollapseButton"] span,
+    button[data-testid="collapsedControl"] span {{
+        font-size: 0 !important;
+    }}
+    button[data-testid="stSidebarCollapseButton"]::after,
+    button[data-testid="collapsedControl"]::after {{
+        content: '◂' !important;
+        font-size: 16px !important;
+        color: #94A3B8 !important;
+        font-family: 'Inter', system-ui, sans-serif !important;
+    }}
 }}
 
 /* ─── Metric Cards ─── */
@@ -831,18 +862,24 @@ if page == "📊 Overview":
             values = list(status_counts.values())
             colors = [STATUS_COLORS.get(l, "#64748B") for l in labels]
             fig = go.Figure(data=[go.Pie(
-                labels=labels, values=values, hole=0.55,
-                marker=dict(colors=colors, line=dict(color="#080B12", width=2)),
+                labels=labels, values=values, hole=0.6,
+                marker=dict(
+                    colors=colors,
+                    line=dict(color="#080B12", width=3),
+                ),
                 textinfo="label+value",
-                textfont=dict(size=12, color="#E2E8F0"),
+                textfont=dict(size=13, color="#E2E8F0", family="Inter"),
                 hovertemplate="<b>%{label}</b><br>Count: %{value}<br>Share: %{percent}<extra></extra>",
+                pull=[0.03] * len(labels),
+                rotation=90,
             )])
             fig.update_layout(
                 **plotly_layout(),
-                title=dict(text="Ticket Volume by Status", font=dict(size=14, color="#94A3B8")),
+                title=dict(text="Ticket Volume by Status", font=dict(size=14, color="#E2E8F0"), x=0.01),
                 showlegend=True,
-                annotations=[dict(text=f"<b>{total}</b><br><span style='font-size:11px;color:#64748B'>Total</span>", x=0.5, y=0.5, font_size=22, font_color="#E2E8F0", showarrow=False)],
-                height=360,
+                legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5, font=dict(size=12, color="#94A3B8")),
+                annotations=[dict(text=f"<b>{total}</b><br><span style='font-size:11px;color:#64748B'>Total</span>", x=0.5, y=0.5, font_size=24, font_color="#E2E8F0", showarrow=False)],
+                height=380,
             )
             st.plotly_chart(fig, use_container_width=True)
 
@@ -853,20 +890,28 @@ if page == "📊 Overview":
             labels = [p for p in order if p in priority_counts]
             values = [priority_counts[p] for p in labels]
             colors = [PRIORITY_COLORS.get(l, "#64748B") for l in labels]
-            fig = go.Figure(data=[go.Bar(
-                y=labels, x=values, orientation="h",
-                marker=dict(color=colors, line=dict(color="rgba(0,0,0,0)", width=0), cornerradius=4),
-                text=values, textposition="auto",
-                textfont=dict(color="#E2E8F0", size=12, family="Inter"),
-                hovertemplate="<b>%{y}</b><br>Count: %{x}<extra></extra>",
-            )])
+            fig = go.Figure()
+            for i, (lbl, val, clr) in enumerate(zip(labels, values, colors)):
+                fig.add_trace(go.Bar(
+                    y=[lbl], x=[val], orientation="h", name=lbl,
+                    marker=dict(
+                        color=clr,
+                        line=dict(color=clr, width=1),
+                        cornerradius=6,
+                        opacity=0.85,
+                    ),
+                    text=[val], textposition="outside",
+                    textfont=dict(color=clr, size=14, family="Inter"),
+                    hovertemplate=f"<b>{lbl}</b><br>Count: {val}<extra></extra>",
+                    showlegend=False,
+                ))
             fig.update_layout(
                 **plotly_layout(
                     yaxis=dict(categoryorder="array", categoryarray=list(reversed(order)), gridcolor="rgba(0,0,0,0)"),
-                    xaxis=dict(gridcolor=_GRID),
+                    xaxis=dict(gridcolor="rgba(148,163,184,0.04)", showgrid=True),
                 ),
-                title=dict(text="Priority Distribution", font=dict(size=14, color="#94A3B8")),
-                height=360,
+                title=dict(text="Priority Distribution", font=dict(size=14, color="#E2E8F0"), x=0.01),
+                height=380, bargap=0.35,
             )
             st.plotly_chart(fig, use_container_width=True)
 
@@ -878,17 +923,21 @@ if page == "📊 Overview":
         if cat_counts:
             labels = list(cat_counts.keys())
             values = list(cat_counts.values())
-            fig = go.Figure(data=[go.Bar(
-                x=labels, y=values,
-                marker=dict(color=["#3B82F6", "#8B5CF6", "#38BDF8"][:len(labels)], cornerradius=6),
-                text=values, textposition="auto",
-                textfont=dict(color="#E2E8F0", size=12, family="Inter"),
-                hovertemplate="<b>%{x}</b><br>Count: %{y}<extra></extra>",
-            )])
+            cat_colors = ["#3B82F6", "#8B5CF6", "#38BDF8", "#10B981", "#F59E0B"][:len(labels)]
+            fig = go.Figure()
+            for i, (lbl, val, clr) in enumerate(zip(labels, values, cat_colors)):
+                fig.add_trace(go.Bar(
+                    x=[lbl], y=[val], name=lbl,
+                    marker=dict(color=clr, cornerradius=8, opacity=0.88, line=dict(color=clr, width=1)),
+                    text=[val], textposition="outside",
+                    textfont=dict(color=clr, size=14, family="Inter"),
+                    hovertemplate=f"<b>{lbl}</b><br>Count: {val}<extra></extra>",
+                    showlegend=False,
+                ))
             fig.update_layout(
                 **plotly_layout(),
-                title=dict(text="Tickets by Category", font=dict(size=14, color="#94A3B8")),
-                height=340,
+                title=dict(text="Tickets by Category", font=dict(size=14, color="#E2E8F0"), x=0.01),
+                height=380, bargap=0.4,
             )
             st.plotly_chart(fig, use_container_width=True)
 
@@ -1193,25 +1242,37 @@ elif page == "📈 Analytics":
 
         cc1, cc2 = st.columns(2)
         with cc1:
-            fig = go.Figure(data=[go.Bar(
-                x=cat_group["category"], y=cat_group["avg_rating"].fillna(0),
-                marker=dict(color=["#3B82F6", "#8B5CF6", "#38BDF8"][:len(cat_group)], cornerradius=6),
-                text=cat_group["avg_rating"].fillna("N/A"), textposition="auto",
-                textfont=dict(color="#E2E8F0", size=12),
-                hovertemplate="<b>%{x}</b><br>Avg Rating: %{y}<extra></extra>",
-            )])
-            fig.update_layout(**plotly_layout(yaxis=dict(range=[0, 5.5])), title=dict(text="Avg Customer Rating by Category", font=dict(size=14, color="#94A3B8")), height=340)
+            cat_colors_r = ["#3B82F6", "#8B5CF6", "#38BDF8"][:len(cat_group)]
+            fig = go.Figure()
+            for i, row in cat_group.iterrows():
+                clr = cat_colors_r[i % len(cat_colors_r)]
+                val = row["avg_rating"] if pd.notna(row["avg_rating"]) else 0
+                fig.add_trace(go.Bar(
+                    x=[row["category"]], y=[val], name=row["category"],
+                    marker=dict(color=clr, cornerradius=8, opacity=0.85, line=dict(color=clr, width=1)),
+                    text=[f"{val:.2f}" if val else "N/A"], textposition="outside",
+                    textfont=dict(color=clr, size=14, family="Inter"),
+                    hovertemplate=f"<b>{row['category']}</b><br>Avg Rating: {val}<extra></extra>",
+                    showlegend=False,
+                ))
+            fig.update_layout(**plotly_layout(yaxis=dict(range=[0, 5.5])), title=dict(text="Avg Customer Rating by Category", font=dict(size=14, color="#E2E8F0"), x=0.01), height=380, bargap=0.4)
             st.plotly_chart(fig, use_container_width=True)
 
         with cc2:
-            fig = go.Figure(data=[go.Bar(
-                x=cat_group["category"], y=cat_group["avg_resolution"].fillna(0),
-                marker=dict(color=["#10B981", "#F59E0B", "#EF4444"][:len(cat_group)], cornerradius=6),
-                text=cat_group["avg_resolution"].fillna("N/A"), textposition="auto",
-                textfont=dict(color="#E2E8F0", size=12),
-                hovertemplate="<b>%{x}</b><br>Avg Resolution: %{y}h<extra></extra>",
-            )])
-            fig.update_layout(**plotly_layout(), title=dict(text="Avg Resolution Time by Category (hours)", font=dict(size=14, color="#94A3B8")), height=340)
+            res_colors = ["#10B981", "#F59E0B", "#EF4444"][:len(cat_group)]
+            fig = go.Figure()
+            for i, row in cat_group.iterrows():
+                clr = res_colors[i % len(res_colors)]
+                val = row["avg_resolution"] if pd.notna(row["avg_resolution"]) else 0
+                fig.add_trace(go.Bar(
+                    x=[row["category"]], y=[val], name=row["category"],
+                    marker=dict(color=clr, cornerradius=8, opacity=0.85, line=dict(color=clr, width=1)),
+                    text=[f"{val:.1f}h" if val else "N/A"], textposition="outside",
+                    textfont=dict(color=clr, size=14, family="Inter"),
+                    hovertemplate=f"<b>{row['category']}</b><br>Avg Resolution: {val}h<extra></extra>",
+                    showlegend=False,
+                ))
+            fig.update_layout(**plotly_layout(), title=dict(text="Avg Resolution Time by Category (hours)", font=dict(size=14, color="#E2E8F0"), x=0.01), height=380, bargap=0.4)
             st.plotly_chart(fig, use_container_width=True)
 
     # ── Agent Workload ──
@@ -1226,20 +1287,26 @@ elif page == "📈 Analytics":
 
         fig = go.Figure()
         fig.add_trace(go.Bar(
-            name="Total", y=agent_group["agent_id"], x=agent_group["total"],
-            orientation="h", marker=dict(color="rgba(59,130,246,0.6)", cornerradius=4),
+            name="Total Assigned", y=agent_group["agent_id"], x=agent_group["total"],
+            orientation="h",
+            marker=dict(color="rgba(59,130,246,0.25)", cornerradius=6, line=dict(color="rgba(59,130,246,0.6)", width=1)),
             hovertemplate="<b>%{y}</b><br>Total: %{x}<extra></extra>",
         ))
         fig.add_trace(go.Bar(
             name="Resolved", y=agent_group["agent_id"], x=agent_group["resolved"],
-            orientation="h", marker=dict(color="rgba(16,185,129,0.7)", cornerradius=4),
+            orientation="h",
+            marker=dict(color="rgba(16,185,129,0.75)", cornerradius=6, line=dict(color="rgba(16,185,129,0.9)", width=1)),
+            text=agent_group.apply(lambda r: f"{r['resolved']}/{r['total']} ({r['resolution_rate']}%)", axis=1),
+            textposition="outside",
+            textfont=dict(color="#94A3B8", size=11, family="Inter"),
             hovertemplate="<b>%{y}</b><br>Resolved: %{x}<extra></extra>",
         ))
         fig.update_layout(
             **plotly_layout(yaxis=dict(gridcolor="rgba(0,0,0,0)")),
             barmode="overlay",
-            title=dict(text="Agent Ticket Volume", font=dict(size=14, color="#94A3B8")),
-            height=400,
+            title=dict(text="Agent Ticket Volume & Resolution Rate", font=dict(size=14, color="#E2E8F0"), x=0.01),
+            height=420, bargap=0.3,
+            legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5),
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -1250,14 +1317,26 @@ elif page == "📈 Analytics":
         if len(res_times) > 0:
             fig = go.Figure(data=[go.Histogram(
                 x=res_times, nbinsx=30,
-                marker=dict(color="rgba(139,92,246,0.6)", line=dict(color="rgba(139,92,246,0.9)", width=1)),
+                marker=dict(
+                    color="rgba(139,92,246,0.45)",
+                    line=dict(color="rgba(139,92,246,0.85)", width=1.5),
+                    pattern=dict(shape="", solidity=0.6),
+                ),
                 hovertemplate="Range: %{x}h<br>Count: %{y}<extra></extra>",
             )])
             q1, q3 = res_times.quantile(0.25), res_times.quantile(0.75)
             iqr = q3 - q1
             upper = q3 + 1.5 * iqr
-            fig.add_vline(x=upper, line_dash="dash", line_color="#EF4444", annotation_text=f"IQR Upper: {upper:.1f}h", annotation_font_color="#EF4444")
-            fig.update_layout(**plotly_layout(), title=dict(text="Resolution Time Distribution (hours)", font=dict(size=14, color="#94A3B8")), height=340, xaxis_title="Hours", yaxis_title="Ticket Count")
+            median = res_times.median()
+            fig.add_vline(x=median, line_dash="dot", line_color="#38BDF8", line_width=2,
+                          annotation_text=f"Median: {median:.1f}h", annotation_font_color="#38BDF8",
+                          annotation_position="top left")
+            fig.add_vline(x=upper, line_dash="dash", line_color="#EF4444", line_width=2,
+                          annotation_text=f"Outlier Threshold: {upper:.1f}h", annotation_font_color="#EF4444")
+            fig.add_vrect(x0=upper, x1=res_times.max() * 1.05, fillcolor="rgba(239,68,68,0.06)", line_width=0,
+                          annotation_text="Anomaly Zone", annotation_position="top right",
+                          annotation_font_color="#EF4444", annotation_font_size=10)
+            fig.update_layout(**plotly_layout(), title=dict(text="Resolution Time Distribution", font=dict(size=14, color="#E2E8F0"), x=0.01), height=380, xaxis_title="Hours", yaxis_title="Ticket Count")
             st.plotly_chart(fig, use_container_width=True)
 
     # ── Customer Satisfaction ──
@@ -1268,26 +1347,37 @@ elif page == "📈 Analytics":
             sr1, sr2 = st.columns(2)
             with sr1:
                 rating_dist = ratings.value_counts().sort_index()
-                fig = go.Figure(data=[go.Bar(
-                    x=[f"{'⭐' * int(r)} ({int(r)})" for r in rating_dist.index],
-                    y=rating_dist.values,
-                    marker=dict(color=["#EF4444", "#F97316", "#F59E0B", "#38BDF8", "#10B981"][:len(rating_dist)], cornerradius=6),
-                    text=rating_dist.values, textposition="auto",
-                    textfont=dict(color="#E2E8F0", size=12),
-                )])
-                fig.update_layout(**plotly_layout(), title=dict(text="Rating Distribution", font=dict(size=14, color="#94A3B8")), height=320)
+                star_colors = ["#EF4444", "#F97316", "#F59E0B", "#38BDF8", "#10B981"]
+                fig = go.Figure()
+                for i, (r, cnt) in enumerate(zip(rating_dist.index, rating_dist.values)):
+                    clr = star_colors[i % len(star_colors)]
+                    fig.add_trace(go.Bar(
+                        x=[f"{int(r)} ★"], y=[cnt], name=f"{int(r)} Star",
+                        marker=dict(color=clr, cornerradius=8, opacity=0.85, line=dict(color=clr, width=1)),
+                        text=[cnt], textposition="outside",
+                        textfont=dict(color=clr, size=14, family="Inter"),
+                        hovertemplate=f"<b>{int(r)} Star</b><br>Count: {cnt}<extra></extra>",
+                        showlegend=False,
+                    ))
+                fig.update_layout(**plotly_layout(), title=dict(text="Rating Distribution", font=dict(size=14, color="#E2E8F0"), x=0.01), height=380, bargap=0.35)
                 st.plotly_chart(fig, use_container_width=True)
 
             with sr2:
                 cat_rating = df.groupby("category")["customer_rating"].apply(lambda x: round(x.dropna().mean(), 2)).reset_index()
                 cat_rating.columns = ["Category", "Avg Rating"]
-                fig = go.Figure(data=[go.Bar(
-                    x=cat_rating["Category"], y=cat_rating["Avg Rating"],
-                    marker=dict(color=["#3B82F6", "#8B5CF6", "#38BDF8"][:len(cat_rating)], cornerradius=6),
-                    text=cat_rating["Avg Rating"], textposition="auto",
-                    textfont=dict(color="#E2E8F0", size=12),
-                )])
-                fig.update_layout(**plotly_layout(yaxis=dict(range=[0, 5.5])), title=dict(text="Avg Rating by Category", font=dict(size=14, color="#94A3B8")), height=320)
+                ar_colors = ["#3B82F6", "#8B5CF6", "#38BDF8"][:len(cat_rating)]
+                fig = go.Figure()
+                for i, row in cat_rating.iterrows():
+                    clr = ar_colors[i % len(ar_colors)]
+                    fig.add_trace(go.Bar(
+                        x=[row["Category"]], y=[row["Avg Rating"]], name=row["Category"],
+                        marker=dict(color=clr, cornerradius=8, opacity=0.85, line=dict(color=clr, width=1)),
+                        text=[f"{row['Avg Rating']:.2f}"], textposition="outside",
+                        textfont=dict(color=clr, size=14, family="Inter"),
+                        hovertemplate=f"<b>{row['Category']}</b><br>Avg Rating: {row['Avg Rating']}<extra></extra>",
+                        showlegend=False,
+                    ))
+                fig.update_layout(**plotly_layout(yaxis=dict(range=[0, 5.5])), title=dict(text="Avg Rating by Category", font=dict(size=14, color="#E2E8F0"), x=0.01), height=380, bargap=0.4)
                 st.plotly_chart(fig, use_container_width=True)
 
 
