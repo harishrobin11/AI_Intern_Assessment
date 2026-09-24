@@ -78,20 +78,24 @@ PRIORITY_COLORS = {
 _GRID = "rgba(148,163,184,0.06)"
 
 def plotly_layout(**overrides):
-    """Return a dark-themed Plotly layout dict, deep-merging any axis overrides."""
-    base_x = dict(gridcolor=_GRID, zerolinecolor=_GRID)
-    base_y = dict(gridcolor=_GRID, zerolinecolor=_GRID)
-    base_x.update(overrides.pop("xaxis", {}))
-    base_y.update(overrides.pop("yaxis", {}))
+    """Return a dark-themed Plotly layout dict, deep-merging dict-type keys."""
+    # Base defaults for dict-type keys
+    bases = {
+        "xaxis": dict(gridcolor=_GRID, zerolinecolor=_GRID),
+        "yaxis": dict(gridcolor=_GRID, zerolinecolor=_GRID),
+        "legend": dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#94A3B8")),
+        "hoverlabel": dict(bgcolor="#1E293B", font_color="#E2E8F0", bordercolor="rgba(148,163,184,0.15)"),
+    }
+    # Deep-merge any overrides for these dict keys
+    for key in list(bases.keys()):
+        if key in overrides:
+            bases[key].update(overrides.pop(key))
     layout = dict(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font=dict(family="Inter, system-ui, sans-serif", color="#94A3B8", size=12),
         margin=dict(l=24, r=24, t=40, b=24),
-        xaxis=base_x,
-        yaxis=base_y,
-        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#94A3B8")),
-        hoverlabel=dict(bgcolor="#1E293B", font_color="#E2E8F0", bordercolor="rgba(148,163,184,0.15)"),
+        **bases,
     )
     layout.update(overrides)
     return layout
