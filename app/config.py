@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,9 +21,10 @@ class Settings(BaseSettings):
     API_PORT: int = 8000
     API_BASE_URL: str = os.getenv("API_BASE_URL", "http://localhost:8000")
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
 
 settings = Settings()
