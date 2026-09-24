@@ -85,16 +85,16 @@ def plotly_layout(**overrides):
         "yaxis": dict(gridcolor=_GRID, zerolinecolor=_GRID),
         "legend": dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#94A3B8")),
         "hoverlabel": dict(bgcolor="#1E293B", font_color="#E2E8F0", bordercolor="rgba(148,163,184,0.15)"),
+        "font": dict(family="Inter, system-ui, sans-serif", color="#94A3B8", size=12),
+        "margin": dict(l=24, r=24, t=40, b=24),
     }
     # Deep-merge any overrides for these dict keys
     for key in list(bases.keys()):
-        if key in overrides:
+        if key in overrides and isinstance(overrides[key], dict):
             bases[key].update(overrides.pop(key))
     layout = dict(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Inter, system-ui, sans-serif", color="#94A3B8", size=12),
-        margin=dict(l=24, r=24, t=40, b=24),
         **bases,
     )
     layout.update(overrides)
@@ -878,12 +878,13 @@ if page == "📊 Overview":
                 rotation=90,
             )])
             fig.update_layout(
-                **plotly_layout(),
-                title=dict(text="Ticket Volume by Status", font=dict(size=14, color="#E2E8F0"), x=0.01),
-                showlegend=True,
-                legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5, font=dict(size=12, color="#94A3B8")),
-                annotations=[dict(text=f"<b>{total}</b><br><span style='font-size:11px;color:#64748B'>Total</span>", x=0.5, y=0.5, font_size=24, font_color="#E2E8F0", showarrow=False)],
-                height=380,
+                **plotly_layout(
+                    title=dict(text="Ticket Volume by Status", font=dict(size=14, color="#E2E8F0"), x=0.01),
+                    showlegend=True,
+                    legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5, font=dict(size=12, color="#94A3B8")),
+                    annotations=[dict(text=f"<b>{total}</b><br><span style='font-size:11px;color:#64748B'>Total</span>", x=0.5, y=0.5, font_size=24, font_color="#E2E8F0", showarrow=False)],
+                    height=380,
+                )
             )
             st.plotly_chart(fig, use_container_width=True)
 
@@ -1306,11 +1307,13 @@ elif page == "📈 Analytics":
             hovertemplate="<b>%{y}</b><br>Resolved: %{x}<extra></extra>",
         ))
         fig.update_layout(
-            **plotly_layout(yaxis=dict(gridcolor="rgba(0,0,0,0)")),
-            barmode="overlay",
-            title=dict(text="Agent Ticket Volume & Resolution Rate", font=dict(size=14, color="#E2E8F0"), x=0.01),
-            height=420, bargap=0.3,
-            legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5),
+            **plotly_layout(
+                yaxis=dict(gridcolor="rgba(0,0,0,0)"),
+                legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5),
+                barmode="overlay",
+                title=dict(text="Agent Ticket Volume & Resolution Rate", font=dict(size=14, color="#E2E8F0"), x=0.01),
+                height=420, bargap=0.3,
+            )
         )
         st.plotly_chart(fig, use_container_width=True)
 
