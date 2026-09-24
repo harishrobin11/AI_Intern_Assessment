@@ -75,16 +75,26 @@ PRIORITY_COLORS = {
 # ---------------------------------------------------------------------------
 # PLOTLY DARK THEME TEMPLATE
 # ---------------------------------------------------------------------------
-PLOTLY_LAYOUT = dict(
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(family="Inter, system-ui, sans-serif", color="#94A3B8", size=12),
-    margin=dict(l=24, r=24, t=40, b=24),
-    xaxis=dict(gridcolor="rgba(148,163,184,0.06)", zerolinecolor="rgba(148,163,184,0.06)"),
-    yaxis=dict(gridcolor="rgba(148,163,184,0.06)", zerolinecolor="rgba(148,163,184,0.06)"),
-    legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#94A3B8")),
-    hoverlabel=dict(bgcolor="#1E293B", font_color="#E2E8F0", bordercolor="rgba(148,163,184,0.15)"),
-)
+_GRID = "rgba(148,163,184,0.06)"
+
+def plotly_layout(**overrides):
+    """Return a dark-themed Plotly layout dict, deep-merging any axis overrides."""
+    base_x = dict(gridcolor=_GRID, zerolinecolor=_GRID)
+    base_y = dict(gridcolor=_GRID, zerolinecolor=_GRID)
+    base_x.update(overrides.pop("xaxis", {}))
+    base_y.update(overrides.pop("yaxis", {}))
+    layout = dict(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Inter, system-ui, sans-serif", color="#94A3B8", size=12),
+        margin=dict(l=24, r=24, t=40, b=24),
+        xaxis=base_x,
+        yaxis=base_y,
+        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#94A3B8")),
+        hoverlabel=dict(bgcolor="#1E293B", font_color="#E2E8F0", bordercolor="rgba(148,163,184,0.15)"),
+    )
+    layout.update(overrides)
+    return layout
 
 # ---------------------------------------------------------------------------
 # GLOBAL CSS — PREMIUM DARK THEME
@@ -787,7 +797,7 @@ if page == "📊 Overview":
                 hovertemplate="<b>%{label}</b><br>Count: %{value}<br>Share: %{percent}<extra></extra>",
             )])
             fig.update_layout(
-                **PLOTLY_LAYOUT,
+                **plotly_layout(),
                 title=dict(text="Ticket Volume by Status", font=dict(size=14, color="#94A3B8")),
                 showlegend=True,
                 annotations=[dict(text=f"<b>{total}</b><br><span style='font-size:11px;color:#64748B'>Total</span>", x=0.5, y=0.5, font_size=22, font_color="#E2E8F0", showarrow=False)],
@@ -810,10 +820,12 @@ if page == "📊 Overview":
                 hovertemplate="<b>%{y}</b><br>Count: %{x}<extra></extra>",
             )])
             fig.update_layout(
-                **PLOTLY_LAYOUT,
+                **plotly_layout(
+                    yaxis=dict(categoryorder="array", categoryarray=list(reversed(order)), gridcolor="rgba(0,0,0,0)"),
+                    xaxis=dict(gridcolor=_GRID),
+                ),
                 title=dict(text="Priority Distribution", font=dict(size=14, color="#94A3B8")),
-                height=360, yaxis=dict(categoryorder="array", categoryarray=list(reversed(order)), gridcolor="rgba(0,0,0,0)"),
-                xaxis=dict(gridcolor="rgba(148,163,184,0.06)"),
+                height=360,
             )
             st.plotly_chart(fig, use_container_width=True)
 
@@ -833,7 +845,7 @@ if page == "📊 Overview":
                 hovertemplate="<b>%{x}</b><br>Count: %{y}<extra></extra>",
             )])
             fig.update_layout(
-                **PLOTLY_LAYOUT,
+                **plotly_layout(),
                 title=dict(text="Tickets by Category", font=dict(size=14, color="#94A3B8")),
                 height=340,
             )
@@ -1147,7 +1159,7 @@ elif page == "📈 Analytics":
                 textfont=dict(color="#E2E8F0", size=12),
                 hovertemplate="<b>%{x}</b><br>Avg Rating: %{y}<extra></extra>",
             )])
-            fig.update_layout(**PLOTLY_LAYOUT, title=dict(text="Avg Customer Rating by Category", font=dict(size=14, color="#94A3B8")), height=340, yaxis=dict(range=[0, 5.5]))
+            fig.update_layout(**plotly_layout(yaxis=dict(range=[0, 5.5])), title=dict(text="Avg Customer Rating by Category", font=dict(size=14, color="#94A3B8")), height=340)
             st.plotly_chart(fig, use_container_width=True)
 
         with cc2:
@@ -1158,7 +1170,7 @@ elif page == "📈 Analytics":
                 textfont=dict(color="#E2E8F0", size=12),
                 hovertemplate="<b>%{x}</b><br>Avg Resolution: %{y}h<extra></extra>",
             )])
-            fig.update_layout(**PLOTLY_LAYOUT, title=dict(text="Avg Resolution Time by Category (hours)", font=dict(size=14, color="#94A3B8")), height=340)
+            fig.update_layout(**plotly_layout(), title=dict(text="Avg Resolution Time by Category (hours)", font=dict(size=14, color="#94A3B8")), height=340)
             st.plotly_chart(fig, use_container_width=True)
 
     # ── Agent Workload ──
@@ -1183,9 +1195,10 @@ elif page == "📈 Analytics":
             hovertemplate="<b>%{y}</b><br>Resolved: %{x}<extra></extra>",
         ))
         fig.update_layout(
-            **PLOTLY_LAYOUT, barmode="overlay",
+            **plotly_layout(yaxis=dict(gridcolor="rgba(0,0,0,0)")),
+            barmode="overlay",
             title=dict(text="Agent Ticket Volume", font=dict(size=14, color="#94A3B8")),
-            height=400, yaxis=dict(gridcolor="rgba(0,0,0,0)"),
+            height=400,
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -1203,7 +1216,7 @@ elif page == "📈 Analytics":
             iqr = q3 - q1
             upper = q3 + 1.5 * iqr
             fig.add_vline(x=upper, line_dash="dash", line_color="#EF4444", annotation_text=f"IQR Upper: {upper:.1f}h", annotation_font_color="#EF4444")
-            fig.update_layout(**PLOTLY_LAYOUT, title=dict(text="Resolution Time Distribution (hours)", font=dict(size=14, color="#94A3B8")), height=340, xaxis_title="Hours", yaxis_title="Ticket Count")
+            fig.update_layout(**plotly_layout(), title=dict(text="Resolution Time Distribution (hours)", font=dict(size=14, color="#94A3B8")), height=340, xaxis_title="Hours", yaxis_title="Ticket Count")
             st.plotly_chart(fig, use_container_width=True)
 
     # ── Customer Satisfaction ──
@@ -1221,7 +1234,7 @@ elif page == "📈 Analytics":
                     text=rating_dist.values, textposition="auto",
                     textfont=dict(color="#E2E8F0", size=12),
                 )])
-                fig.update_layout(**PLOTLY_LAYOUT, title=dict(text="Rating Distribution", font=dict(size=14, color="#94A3B8")), height=320)
+                fig.update_layout(**plotly_layout(), title=dict(text="Rating Distribution", font=dict(size=14, color="#94A3B8")), height=320)
                 st.plotly_chart(fig, use_container_width=True)
 
             with sr2:
@@ -1233,7 +1246,7 @@ elif page == "📈 Analytics":
                     text=cat_rating["Avg Rating"], textposition="auto",
                     textfont=dict(color="#E2E8F0", size=12),
                 )])
-                fig.update_layout(**PLOTLY_LAYOUT, title=dict(text="Avg Rating by Category", font=dict(size=14, color="#94A3B8")), height=320, yaxis=dict(range=[0, 5.5]))
+                fig.update_layout(**plotly_layout(yaxis=dict(range=[0, 5.5])), title=dict(text="Avg Rating by Category", font=dict(size=14, color="#94A3B8")), height=320)
                 st.plotly_chart(fig, use_container_width=True)
 
 
