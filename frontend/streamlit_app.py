@@ -327,20 +327,20 @@ input:focus, textarea:focus, .stTextInput input:focus {{
 }}
 
 /* ─── Expanders ─── */
-details[data-testid="stExpander"] {
+details[data-testid="stExpander"] {{
     background: rgba(21,30,45,0.6) !important;
     border: 1px solid rgba(148,163,184,0.08) !important;
     border-radius: 12px !important;
-}
-details[data-testid="stExpander"] summary {
+}}
+details[data-testid="stExpander"] summary {{
     color: #94A3B8 !important;
     font-weight: 600 !important;
-}
+}}
 details[data-testid="stExpander"] summary span,
-[data-testid="stExpanderToggleIcon"] {
+[data-testid="stExpanderToggleIcon"] {{
     font-family: 'Material Symbols Rounded', sans-serif !important;
     font-feature-settings: 'liga' 1 !important;
-}
+}}
 
 /* ─── Dataframes ─── */
 [data-testid="stDataFrame"], .stDataFrame {{
