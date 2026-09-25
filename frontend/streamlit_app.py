@@ -211,7 +211,7 @@ section[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] 
     max-width: 1440px !important;
 }}
 
-/* ─── Headings ─── */
+/* ─── Headings & Typography ─── */
 h1, h2, h3, h4, h5, h6, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {{
     color: #E2E8F0 !important;
     font-family: 'Inter', system-ui, sans-serif !important;
@@ -220,7 +220,7 @@ h1, h2, h3, h4, h5, h6, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {{
 h1 {{ font-size: 1.75rem !important; letter-spacing: -0.02em; }}
 h2 {{ font-size: 1.35rem !important; letter-spacing: -0.01em; }}
 h3 {{ font-size: 1.1rem !important; }}
-p, span, div, li {{ font-family: 'Inter', system-ui, sans-serif !important; }}
+p, li {{ font-family: 'Inter', system-ui, sans-serif !important; }}
 
 /* ─── Hide Default Streamlit Elements ─── */
 #MainMenu {{ visibility: hidden; }}
