@@ -1115,6 +1115,10 @@ elif page == "🚨 Anomaly Center":
 
     if anomalies:
         df_anom = pd.DataFrame(anomalies)
+        if "detected_value" in df_anom.columns:
+            df_anom["detected_value"] = df_anom["detected_value"].astype(str)
+        if "threshold" in df_anom.columns:
+            df_anom["threshold"] = df_anom["threshold"].astype(str)
         display_cols = ["ticket_id", "severity", "anomaly_type", "reason", "detected_value", "threshold"]
         existing_cols = [c for c in display_cols if c in df_anom.columns]
         st.dataframe(df_anom[existing_cols], use_container_width=True, height=460)
