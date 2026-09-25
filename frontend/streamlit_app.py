@@ -145,24 +145,38 @@ section[data-testid="stSidebar"] * {{
     color: #94A3B8 !important;
     font-family: 'Inter', system-ui, sans-serif !important;
 }}
-section[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label {{
-    padding: 10px 16px !important;
-    border-radius: 10px !important;
-    margin-bottom: 4px !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
+/* ─── Sidebar Navigation Buttons (No Radio Inputs) ─── */
+[data-testid="stSidebar"] .stButton > button[kind="secondary"] {{
     background: transparent !important;
+    color: #94A3B8 !important;
+    border: 1px solid transparent !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
+    padding: 10px 16px !important;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    border-radius: 10px !important;
+    margin-bottom: 2px !important;
     width: 100% !important;
-    display: flex !important;
-    align-items: center !important;
 }}
-section[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label > div:first-child,
-section[data-testid="stSidebar"] [data-testid="stRadio"] label input {{
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
+[data-testid="stSidebar"] .stButton > button[kind="secondary"]:hover {{
+    background: rgba(56,189,248,0.08) !important;
+    color: #E2E8F0 !important;
+    border-color: rgba(56,189,248,0.15) !important;
+}}
+[data-testid="stSidebar"] .stButton > button[kind="primary"] {{
+    background: linear-gradient(90deg, rgba(59,130,246,0.9) 0%, rgba(37,99,235,0.9) 100%) !important;
+    color: white !important;
+    border: none !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
+    padding: 10px 16px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 16px rgba(59,130,246,0.25) !important;
+    margin-bottom: 2px !important;
+    width: 100% !important;
 }}
 section[data-testid="stSidebar"] [data-testid="stRadio"] label p,
 section[data-testid="stSidebar"] [data-testid="stRadio"] label span {{
@@ -856,11 +870,28 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    page = st.radio(
-        "Navigation",
-        ["📊 Overview", "💬 Ask SupportIQ", "🚨 Anomaly Center", "🔍 Ticket Explorer", "📈 Analytics", "⚙️ System Health"],
-        label_visibility="collapsed",
-    )
+    st.markdown('<div style="font-size:0.75rem; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:0.08em; padding:8px 4px 12px 4px;">Navigation</div>', unsafe_allow_html=True)
+
+    nav_pages = [
+        "📊 Overview",
+        "💬 Ask SupportIQ",
+        "🚨 Anomaly Center",
+        "🔍 Ticket Explorer",
+        "📈 Analytics",
+        "⚙️ System Health",
+    ]
+
+    if "current_page" not in st.session_state:
+        st.session_state["current_page"] = "📊 Overview"
+
+    for p in nav_pages:
+        is_active = (st.session_state["current_page"] == p)
+        btn_type = "primary" if is_active else "secondary"
+        if st.button(p, key=f"nav_btn_{p}", type=btn_type, use_container_width=True):
+            st.session_state["current_page"] = p
+            st.rerun()
+
+    page = st.session_state["current_page"]
 
 
 # ═══════════════════════════════════════════════════════════════════════════
