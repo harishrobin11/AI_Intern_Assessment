@@ -227,57 +227,94 @@ p, span, div, li {{ font-family: 'Inter', system-ui, sans-serif !important; }}
 footer {{ visibility: hidden; }}
 header[data-testid="stHeader"] {{ background: var(--bg-main) !important; }}
 
-/* ─── Sidebar Collapse / Expand Button Fix ─── */
+/* ─── Sidebar Toggle Button (Collapse & Expand) ─── */
 button[data-testid="stSidebarCollapseButton"],
-button[data-testid="collapsedControl"] {{
-    background: rgba(21,30,45,0.9) !important;
-    border: 1px solid rgba(148,163,184,0.12) !important;
+button[data-testid="collapsedControl"],
+[data-testid="stSidebarCollapsedControl"] button,
+[data-testid="stSidebarCollapsedControl"],
+button[aria-label*="sidebar" i],
+button[aria-label*="Sidebar" i],
+[data-testid="stHeader"] button {{
+    background: #1E293B !important;
+    border: 1px solid rgba(148,163,184,0.2) !important;
     border-radius: 8px !important;
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
     padding: 0 !important;
-    display: flex !important;
+    margin: 6px 12px !important;
+    display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+    position: relative !important;
     overflow: hidden !important;
     transition: all 0.2s ease !important;
-    z-index: 999 !important;
+    z-index: 999999 !important;
 }}
+
 button[data-testid="stSidebarCollapseButton"]:hover,
-button[data-testid="collapsedControl"]:hover {{
-    background: rgba(56,189,248,0.10) !important;
-    border-color: rgba(56,189,248,0.30) !important;
-    box-shadow: 0 0 12px rgba(56,189,248,0.12) !important;
+button[data-testid="collapsedControl"]:hover,
+[data-testid="stSidebarCollapsedControl"] button:hover,
+[data-testid="stSidebarCollapsedControl"]:hover,
+button[aria-label*="sidebar" i]:hover,
+button[aria-label*="Sidebar" i]:hover,
+[data-testid="stHeader"] button:hover {{
+    background: #3B82F6 !important;
+    border-color: #60A5FA !important;
+    box-shadow: 0 4px 12px rgba(59,130,246,0.4) !important;
 }}
-/* Hide raw icon text string (keyboard_double) unconditionally across all browsers */
+
+/* HIDE ANY AND ALL INNER TEXT NODES OR SPANS INSIDE THE TOGGLE BUTTON */
 button[data-testid="stSidebarCollapseButton"] *,
-button[data-testid="collapsedControl"] * {{
+button[data-testid="collapsedControl"] *,
+[data-testid="stSidebarCollapsedControl"] *,
+button[aria-label*="sidebar" i] *,
+button[aria-label*="Sidebar" i] *,
+[data-testid="stHeader"] button * {{
     font-size: 0 !important;
     width: 0 !important;
     height: 0 !important;
     display: none !important;
     visibility: hidden !important;
+    opacity: 0 !important;
+    color: transparent !important;
 }}
-/* Render clean Unicode chevron icon */
+
+/* RENDER CLEAN STYLED BUTTON ARROWS VIA ::after */
 button[data-testid="stSidebarCollapseButton"]::after {{
     content: '◂' !important;
-    font-size: 16px !important;
-    color: #94A3B8 !important;
-    font-family: 'Inter', system-ui, sans-serif !important;
+    font-size: 18px !important;
+    color: #E2E8F0 !important;
+    font-family: system-ui, -apple-system, sans-serif !important;
+    font-weight: bold !important;
     line-height: 1 !important;
 }}
-button[data-testid="collapsedControl"]::after {{
+
+button[data-testid="collapsedControl"]::after,
+[data-testid="stSidebarCollapsedControl"]::after,
+[data-testid="stSidebarCollapsedControl"] button::after,
+button[aria-label*="sidebar" i]::after,
+button[aria-label*="Sidebar" i]::after,
+[data-testid="stHeader"] button::after {{
     content: '▸' !important;
-    font-size: 16px !important;
-    color: #94A3B8 !important;
-    font-family: 'Inter', system-ui, sans-serif !important;
+    font-size: 18px !important;
+    color: #E2E8F0 !important;
+    font-family: system-ui, -apple-system, sans-serif !important;
+    font-weight: bold !important;
     line-height: 1 !important;
 }}
+
 button[data-testid="stSidebarCollapseButton"]:hover::after,
-button[data-testid="collapsedControl"]:hover::after {{
-    color: #38BDF8 !important;
+button[data-testid="collapsedControl"]:hover::after,
+[data-testid="stSidebarCollapsedControl"]:hover::after,
+[data-testid="stSidebarCollapsedControl"] button:hover::after,
+button[aria-label*="sidebar" i]:hover::after,
+button[aria-label*="Sidebar" i]:hover::after,
+[data-testid="stHeader"] button:hover::after {{
+    color: #FFFFFF !important;
 }}
 
 /* ─── Metric Cards ─── */
