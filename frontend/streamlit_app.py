@@ -993,36 +993,50 @@ elif page == "💬 Ask SupportIQ":
         "List unresolved high-priority tickets.",
     ]
 
-    selected_q = None
+    if "active_question" not in st.session_state:
+        st.session_state["active_question"] = ""
+
+    suggestion_clicked = None
     cols = st.columns(4)
     for i, q in enumerate(sample_queries):
         if cols[i % 4].button(q, key=f"sq_{i}", use_container_width=True):
-            selected_q = q
+            suggestion_clicked = q
+            st.session_state["active_question"] = q
 
     st.markdown("")
 
-    # ── Query Input ──
-    question_input = st.text_input(
-        "Your question",
-        value=selected_q or "",
-        placeholder="e.g. What is the average customer rating for Technical tickets?",
-        label_visibility="collapsed",
-    )
+    # ── Query Input Form ──
+    with st.form("query_form", clear_on_submit=False):
+        question_input = st.text_input(
+            "Your question",
+            value=st.session_state["active_question"],
+            placeholder="e.g. What is the average customer rating for Technical tickets?",
+            label_visibility="collapsed",
+        )
+        col_btn, _ = st.columns([1, 4])
+        with col_btn:
+            form_submit = st.form_submit_button("Ask SupportIQ →", type="primary", use_container_width=True)
 
-    col_btn, col_space = st.columns([1, 4])
-    with col_btn:
-        submit = st.button("Ask SupportIQ →", type="primary", use_container_width=True)
+    query_to_run = None
+    if suggestion_clicked:
+        query_to_run = suggestion_clicked
+    elif form_submit:
+        if question_input.strip():
+            query_to_run = question_input.strip()
+            st.session_state["active_question"] = query_to_run
+        else:
+            st.warning("Please enter a question before submitting.")
 
-    if submit and question_input.strip():
-        with st.spinner(""):
+    if query_to_run:
+        with st.spinner("Processing query..."):
             st.markdown(f"""
             <div class="sq-card" style="padding: 14px 20px; margin-bottom: 8px;">
                 <span style="color: #64748B; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;">Your Question</span>
-                <div style="color: #E2E8F0; font-size: 1.05rem; margin-top: 4px;">{question_input.strip()}</div>
+                <div style="color: #E2E8F0; font-size: 1.05rem; margin-top: 4px;">{query_to_run}</div>
             </div>
             """, unsafe_allow_html=True)
 
-            res = post_query(question_input.strip())
+            res = post_query(query_to_run)
             answer = res.get("answer", "No answer available.")
             result_data = res.get("result", {})
             plan = res.get("query_plan", {})
@@ -1057,9 +1071,6 @@ elif page == "💬 Ask SupportIQ":
                 render_section(f"Supporting Evidence ({len(evidence)} records)")
                 df_ev = pd.DataFrame(evidence)
                 st.dataframe(df_ev, use_container_width=True, height=320)
-
-    elif submit:
-        st.warning("Please enter a question before submitting.")
 
 
 # ═══════════════════════════════════════════════════════════════════════════
