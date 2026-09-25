@@ -894,13 +894,17 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     health_data, is_api_online = fetch_health()
-    api_status = "healthy" if is_api_online else "unhealthy"
+    ds_ok = health_data.get("row_count", 0) > 0
+    sys_online = is_api_online or ds_ok
+    status_label = "API Online" if is_api_online else ("Engine Active" if ds_ok else "Offline")
+    status_class = "healthy" if sys_online else "unhealthy"
+
     st.markdown(f"""
     <div style="padding: 0 16px 16px 16px; font-size: 0.78rem;">
-        <span class="health-dot {api_status}"></span>
-        <span style="color: #64748B;">API {'Online' if is_api_online else 'Offline'}</span>
+        <span class="health-dot {status_class}"></span>
+        <span style="color: #64748B;">{status_label}</span>
         &nbsp;&nbsp;
-        <span class="health-dot {'healthy' if health_data.get('row_count', 0) > 0 else 'unhealthy'}"></span>
+        <span class="health-dot {'healthy' if ds_ok else 'unhealthy'}"></span>
         <span style="color: #64748B;">{health_data.get('row_count', 0)} records</span>
     </div>
     """, unsafe_allow_html=True)
@@ -1518,13 +1522,17 @@ elif page == "⚙️ System Health":
     ds_ok = health_data.get("row_count", 0) > 0
     llm_ok = health_data.get("groq_configured", False)
 
+    backend_title = "FastAPI Online" if api_ok else ("Engine Active" if ds_ok else "Offline")
+    backend_status = "healthy" if (api_ok or ds_ok) else "unhealthy"
+    backend_subtitle = API_BASE_URL if api_ok else "Streamlit Cloud Engine"
+
     with h1:
         st.markdown(f"""
         <div class="sq-card" style="text-align: center;">
-            <div class="health-dot {'healthy' if api_ok else 'unhealthy'}" style="width: 12px; height: 12px; margin: 0 auto 10px auto;"></div>
-            <div style="font-size: 1.1rem; font-weight: 700; color: #E2E8F0; margin-bottom: 4px;">{'Online' if api_ok else 'Offline'}</div>
-            <div style="font-size: 0.78rem; color: #64748B; text-transform: uppercase; letter-spacing: 0.06em;">FastAPI Backend</div>
-            <div style="font-size: 0.82rem; color: #475569; margin-top: 8px;">{API_BASE_URL}</div>
+            <div class="health-dot {backend_status}" style="width: 12px; height: 12px; margin: 0 auto 10px auto;"></div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: #E2E8F0; margin-bottom: 4px;">{backend_title}</div>
+            <div style="font-size: 0.78rem; color: #64748B; text-transform: uppercase; letter-spacing: 0.06em;">Analytics Engine</div>
+            <div style="font-size: 0.82rem; color: #475569; margin-top: 8px;">{backend_subtitle}</div>
         </div>
         """, unsafe_allow_html=True)
     with h2:
@@ -1553,8 +1561,8 @@ elif page == "⚙️ System Health":
     <div class="sq-card">
         <table style="width: 100%; border-collapse: collapse;">
             <tr style="border-bottom: 1px solid rgba(148,163,184,0.06);">
-                <td style="padding: 12px 0; color: #64748B; font-size: 0.88rem; width: 220px;">API Base URL</td>
-                <td style="padding: 12px 0; color: #E2E8F0; font-size: 0.88rem;"><code style="background: rgba(56,189,248,0.08); padding: 2px 8px; border-radius: 4px; color: #38BDF8;">{API_BASE_URL}</code></td>
+                <td style="padding: 12px 0; color: #64748B; font-size: 0.88rem; width: 220px;">Execution Mode</td>
+                <td style="padding: 12px 0; color: #E2E8F0; font-size: 0.88rem;"><code style="background: rgba(56,189,248,0.08); padding: 2px 8px; border-radius: 4px; color: #38BDF8;">{'FastAPI REST Service' if api_ok else 'Streamlit Cloud Direct Engine'}</code></td>
             </tr>
             <tr style="border-bottom: 1px solid rgba(148,163,184,0.06);">
                 <td style="padding: 12px 0; color: #64748B; font-size: 0.88rem;">Dataset Path</td>
