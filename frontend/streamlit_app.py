@@ -251,32 +251,33 @@ button[data-testid="collapsedControl"]:hover {{
     border-color: rgba(56,189,248,0.30) !important;
     box-shadow: 0 0 12px rgba(56,189,248,0.12) !important;
 }}
-/* Fix: hide the raw text icon name and replace with a proper symbol */
-button[data-testid="stSidebarCollapseButton"] span,
-button[data-testid="collapsedControl"] span {{
-    font-family: 'Material Symbols Rounded' !important;
-    font-size: 20px !important;
+/* Hide raw icon text string (keyboard_double) unconditionally across all browsers */
+button[data-testid="stSidebarCollapseButton"] *,
+button[data-testid="collapsedControl"] * {{
+    font-size: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+    visibility: hidden !important;
+}}
+/* Render clean Unicode chevron icon */
+button[data-testid="stSidebarCollapseButton"]::after {{
+    content: '◂' !important;
+    font-size: 16px !important;
     color: #94A3B8 !important;
-    -webkit-font-smoothing: antialiased !important;
-    font-feature-settings: 'liga' !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    line-height: 1 !important;
 }}
-button[data-testid="stSidebarCollapseButton"]:hover span,
-button[data-testid="collapsedControl"]:hover span {{
-    color: #E2E8F0 !important;
+button[data-testid="collapsedControl"]::after {{
+    content: '▸' !important;
+    font-size: 16px !important;
+    color: #94A3B8 !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    line-height: 1 !important;
 }}
-/* Fallback: if icon font still fails, clip text and show a CSS arrow */
-@supports not (font-variation-settings: normal) {{
-    button[data-testid="stSidebarCollapseButton"] span,
-    button[data-testid="collapsedControl"] span {{
-        font-size: 0 !important;
-    }}
-    button[data-testid="stSidebarCollapseButton"]::after,
-    button[data-testid="collapsedControl"]::after {{
-        content: '◂' !important;
-        font-size: 16px !important;
-        color: #94A3B8 !important;
-        font-family: 'Inter', system-ui, sans-serif !important;
-    }}
+button[data-testid="stSidebarCollapseButton"]:hover::after,
+button[data-testid="collapsedControl"]:hover::after {{
+    color: #38BDF8 !important;
 }}
 
 /* ─── Metric Cards ─── */
