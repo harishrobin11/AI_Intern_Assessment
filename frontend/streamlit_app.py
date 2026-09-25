@@ -227,9 +227,10 @@ p, li {{ font-family: 'Inter', system-ui, sans-serif !important; }}
 footer {{ visibility: hidden; }}
 header[data-testid="stHeader"] {{ background: var(--bg-main) !important; }}
 
-/* ─── Sidebar Toggle Button (Collapse & Expand) ─── */
-button[data-testid="stSidebarCollapseButton"],
-button[data-testid="collapsedControl"],
+/* ─── Sidebar Toggle Controls (Collapse & Expand) ─── */
+[data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebarCollapseButton"] button,
+[data-testid="collapsedControl"],
 [data-testid="stSidebarCollapsedControl"] button,
 [data-testid="stSidebarCollapsedControl"],
 button[aria-label*="sidebar" i],
@@ -238,12 +239,12 @@ button[aria-label*="Sidebar" i],
     background: #1E293B !important;
     border: 1px solid rgba(148,163,184,0.2) !important;
     border-radius: 8px !important;
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
     padding: 0 !important;
-    margin: 6px 12px !important;
+    margin: 4px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -255,8 +256,9 @@ button[aria-label*="Sidebar" i],
     z-index: 999999 !important;
 }}
 
-button[data-testid="stSidebarCollapseButton"]:hover,
-button[data-testid="collapsedControl"]:hover,
+[data-testid="stSidebarCollapseButton"]:hover,
+[data-testid="stSidebarCollapseButton"] button:hover,
+[data-testid="collapsedControl"]:hover,
 [data-testid="stSidebarCollapsedControl"] button:hover,
 [data-testid="stSidebarCollapsedControl"]:hover,
 button[aria-label*="sidebar" i]:hover,
@@ -267,14 +269,17 @@ button[aria-label*="Sidebar" i]:hover,
     box-shadow: 0 4px 12px rgba(59,130,246,0.4) !important;
 }}
 
-/* HIDE ANY AND ALL INNER TEXT NODES OR SPANS INSIDE THE TOGGLE BUTTON */
-button[data-testid="stSidebarCollapseButton"] *,
-button[data-testid="collapsedControl"] *,
+/* HIDE ALL TEXT / SPANS / ICON NAMES UNCONDITIONALLY */
+[data-testid="stSidebarCollapseButton"] *,
+[data-testid="stSidebarCollapseButton"] span,
+[data-testid="collapsedControl"] *,
 [data-testid="stSidebarCollapsedControl"] *,
+[data-testid="stIconMaterial"],
 button[aria-label*="sidebar" i] *,
 button[aria-label*="Sidebar" i] *,
 [data-testid="stHeader"] button * {{
     font-size: 0 !important;
+    line-height: 0 !important;
     width: 0 !important;
     height: 0 !important;
     display: none !important;
@@ -284,9 +289,10 @@ button[aria-label*="Sidebar" i] *,
 }}
 
 /* RENDER CLEAN STYLED BUTTON ARROWS VIA ::after */
-button[data-testid="stSidebarCollapseButton"]::after {{
+[data-testid="stSidebarCollapseButton"]::after,
+[data-testid="stSidebarCollapseButton"] button::after {{
     content: '◂' !important;
-    font-size: 18px !important;
+    font-size: 16px !important;
     color: #E2E8F0 !important;
     font-family: system-ui, -apple-system, sans-serif !important;
     font-weight: bold !important;
@@ -300,14 +306,15 @@ button[aria-label*="sidebar" i]::after,
 button[aria-label*="Sidebar" i]::after,
 [data-testid="stHeader"] button::after {{
     content: '▸' !important;
-    font-size: 18px !important;
+    font-size: 16px !important;
     color: #E2E8F0 !important;
     font-family: system-ui, -apple-system, sans-serif !important;
     font-weight: bold !important;
     line-height: 1 !important;
 }}
 
-button[data-testid="stSidebarCollapseButton"]:hover::after,
+[data-testid="stSidebarCollapseButton"]:hover::after,
+[data-testid="stSidebarCollapseButton"] button:hover::after,
 button[data-testid="collapsedControl"]:hover::after,
 [data-testid="stSidebarCollapsedControl"]:hover::after,
 [data-testid="stSidebarCollapsedControl"] button:hover::after,
