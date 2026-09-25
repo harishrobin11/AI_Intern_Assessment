@@ -145,22 +145,50 @@ section[data-testid="stSidebar"] * {{
     color: #94A3B8 !important;
     font-family: 'Inter', system-ui, sans-serif !important;
 }}
-section[data-testid="stSidebar"] [data-testid="stRadio"] label {{
-    padding: 8px 16px !important;
-    border-radius: 8px !important;
+section[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label {{
+    padding: 10px 16px !important;
+    border-radius: 10px !important;
+    margin-bottom: 4px !important;
+    cursor: pointer !important;
     transition: all 0.2s ease !important;
-    font-size: 0.92rem !important;
+    background: transparent !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+}}
+section[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label > div:first-child,
+section[data-testid="stSidebar"] [data-testid="stRadio"] label input {{
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}}
+section[data-testid="stSidebar"] [data-testid="stRadio"] label p,
+section[data-testid="stSidebar"] [data-testid="stRadio"] label span {{
+    font-size: 0.95rem !important;
     font-weight: 500 !important;
+    color: #94A3B8 !important;
+    width: 100% !important;
 }}
 section[data-testid="stSidebar"] [data-testid="stRadio"] label:hover {{
-    background: rgba(56,189,248,0.06) !important;
+    background: rgba(56,189,248,0.08) !important;
+}}
+section[data-testid="stSidebar"] [data-testid="stRadio"] label:hover p,
+section[data-testid="stSidebar"] [data-testid="stRadio"] label:hover span {{
     color: #E2E8F0 !important;
 }}
-section[data-testid="stSidebar"] [data-testid="stRadio"] label[data-checked="true"],
+section[data-testid="stSidebar"] [data-testid="stRadio"] label[aria-checked="true"],
 section[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {{
-    background: rgba(56,189,248,0.10) !important;
+    background: linear-gradient(90deg, rgba(56,189,248,0.16) 0%, rgba(56,189,248,0.03) 100%) !important;
+    border-left: 3px solid #38BDF8 !important;
+}}
+section[data-testid="stSidebar"] [data-testid="stRadio"] label[aria-checked="true"] p,
+section[data-testid="stSidebar"] [data-testid="stRadio"] label[aria-checked="true"] span,
+section[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) p,
+section[data-testid="stSidebar"] [data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) span {{
     color: #38BDF8 !important;
-    border-left: 2px solid #38BDF8 !important;
+    font-weight: 600 !important;
 }}
 
 /* ─── Content Container ─── */
@@ -336,10 +364,16 @@ details[data-testid="stExpander"] summary {{
     color: #94A3B8 !important;
     font-weight: 600 !important;
 }}
-details[data-testid="stExpander"] summary span,
-[data-testid="stExpanderToggleIcon"] {{
-    font-family: 'Material Symbols Rounded', sans-serif !important;
-    font-feature-settings: 'liga' 1 !important;
+details[data-testid="stExpander"] summary [data-testid="stExpanderToggleIcon"] {{
+    font-size: 0 !important;
+    width: 18px !important;
+    display: inline-block !important;
+    visibility: hidden !important;
+}}
+details[data-testid="stExpander"] summary p,
+details[data-testid="stExpander"] summary span {{
+    color: #E2E8F0 !important;
+    font-size: 0.95rem !important;
 }}
 
 /* ─── Dataframes ─── */
@@ -1055,16 +1089,14 @@ elif page == "💬 Ask SupportIQ":
                 elif operation in ["sum", "min", "max"] and isinstance(value, (int, float)):
                     metric_html = f'<div class="ai-metric">{value}</div><div class="ai-metric-label">{plan.get("metric", "metric")}</div>'
 
-                clean_answer = html.escape(str(answer)).replace("\n", "<br>")
+                clean_answer = str(answer).replace("\n", "<br>")
 
-                st.markdown(textwrap.dedent(f"""
-                <div class="ai-response">
-                    <div class="ai-badge">⚡ Computed Analytics Response</div>
-                    {metric_html}
-                    <div class="ai-answer-text">{clean_answer}</div>
-                    <div class="ai-context">Records analyzed: {record_count} · Operation: {operation}</div>
-                </div>
-                """), unsafe_allow_html=True)
+                st.markdown(f"""<div class="ai-response">
+<div class="ai-badge">⚡ Computed Analytics Response</div>
+{metric_html}
+<div class="ai-answer-text">{clean_answer}</div>
+<div class="ai-context">Records analyzed: {record_count} · Operation: {operation}</div>
+</div>""", unsafe_allow_html=True)
 
                 with st.expander("🔧 Query Plan (LLM → Pydantic Validated JSON)", expanded=False):
                     st.json(plan)
