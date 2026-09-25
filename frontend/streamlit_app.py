@@ -7,6 +7,8 @@ import os
 import sys
 import json
 import math
+import html
+import textwrap
 import httpx
 import pandas as pd
 import numpy as np
@@ -325,15 +327,20 @@ input:focus, textarea:focus, .stTextInput input:focus {{
 }}
 
 /* ─── Expanders ─── */
-details[data-testid="stExpander"] {{
+details[data-testid="stExpander"] {
     background: rgba(21,30,45,0.6) !important;
     border: 1px solid rgba(148,163,184,0.08) !important;
     border-radius: 12px !important;
-}}
-details[data-testid="stExpander"] summary {{
+}
+details[data-testid="stExpander"] summary {
     color: #94A3B8 !important;
     font-weight: 600 !important;
-}}
+}
+details[data-testid="stExpander"] summary span,
+[data-testid="stExpanderToggleIcon"] {
+    font-family: 'Material Symbols Rounded', sans-serif !important;
+    font-feature-settings: 'liga' 1 !important;
+}
 
 /* ─── Dataframes ─── */
 [data-testid="stDataFrame"], .stDataFrame {{
@@ -996,12 +1003,11 @@ elif page == "💬 Ask SupportIQ":
     if "active_question" not in st.session_state:
         st.session_state["active_question"] = ""
 
-    suggestion_clicked = None
     cols = st.columns(4)
     for i, q in enumerate(sample_queries):
         if cols[i % 4].button(q, key=f"sq_{i}", use_container_width=True):
-            suggestion_clicked = q
             st.session_state["active_question"] = q
+            st.rerun()
 
     st.markdown("")
 
@@ -1017,60 +1023,56 @@ elif page == "💬 Ask SupportIQ":
         with col_btn:
             form_submit = st.form_submit_button("Ask SupportIQ →", type="primary", use_container_width=True)
 
-    query_to_run = None
-    if suggestion_clicked:
-        query_to_run = suggestion_clicked
-    elif form_submit:
-        if question_input.strip():
-            query_to_run = question_input.strip()
-            st.session_state["active_question"] = query_to_run
-        else:
+    if form_submit:
+        query_text = question_input.strip()
+        if not query_text:
             st.warning("Please enter a question before submitting.")
+        else:
+            st.session_state["active_question"] = query_text
+            with st.spinner("Processing query..."):
+                st.markdown(textwrap.dedent(f"""
+                <div class="sq-card" style="padding: 14px 20px; margin-bottom: 8px;">
+                    <span style="color: #64748B; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;">Your Question</span>
+                    <div style="color: #E2E8F0; font-size: 1.05rem; margin-top: 4px;">{html.escape(query_text)}</div>
+                </div>
+                """), unsafe_allow_html=True)
 
-    if query_to_run:
-        with st.spinner("Processing query..."):
-            st.markdown(f"""
-            <div class="sq-card" style="padding: 14px 20px; margin-bottom: 8px;">
-                <span style="color: #64748B; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;">Your Question</span>
-                <div style="color: #E2E8F0; font-size: 1.05rem; margin-top: 4px;">{query_to_run}</div>
-            </div>
-            """, unsafe_allow_html=True)
+                res = post_query(query_text)
+                answer = res.get("answer", "No answer available.")
+                result_data = res.get("result", {})
+                plan = res.get("query_plan", {})
+                evidence = res.get("evidence", [])
 
-            res = post_query(query_to_run)
-            answer = res.get("answer", "No answer available.")
-            result_data = res.get("result", {})
-            plan = res.get("query_plan", {})
-            evidence = res.get("evidence", [])
+                value = result_data.get("value")
+                record_count = result_data.get("record_count", 0)
+                operation = plan.get("operation", "")
 
-            # Extract primary metric for display
-            value = result_data.get("value")
-            record_count = result_data.get("record_count", 0)
-            operation = plan.get("operation", "")
+                metric_html = ""
+                if operation in ["count"] and isinstance(value, (int, float)):
+                    metric_html = f'<div class="ai-metric">{int(value)}</div><div class="ai-metric-label">matching tickets</div>'
+                elif operation in ["average", "mean"] and isinstance(value, (int, float)):
+                    metric_html = f'<div class="ai-metric">{value}</div><div class="ai-metric-label">{plan.get("metric", "metric")}</div>'
+                elif operation in ["sum", "min", "max"] and isinstance(value, (int, float)):
+                    metric_html = f'<div class="ai-metric">{value}</div><div class="ai-metric-label">{plan.get("metric", "metric")}</div>'
 
-            metric_html = ""
-            if operation in ["count"] and isinstance(value, (int, float)):
-                metric_html = f'<div class="ai-metric">{int(value)}</div><div class="ai-metric-label">matching tickets</div>'
-            elif operation in ["average", "mean"] and isinstance(value, (int, float)):
-                metric_html = f'<div class="ai-metric">{value}</div><div class="ai-metric-label">{plan.get("metric", "metric")}</div>'
-            elif operation in ["sum", "min", "max"] and isinstance(value, (int, float)):
-                metric_html = f'<div class="ai-metric">{value}</div><div class="ai-metric-label">{plan.get("metric", "metric")}</div>'
+                clean_answer = html.escape(str(answer)).replace("\n", "<br>")
 
-            st.markdown(f"""
-            <div class="ai-response">
-                <div class="ai-badge">⚡ Computed Analytics Response</div>
-                {metric_html}
-                <div class="ai-answer-text">{answer}</div>
-                <div class="ai-context">Records analyzed: {record_count} · Operation: {operation}</div>
-            </div>
-            """, unsafe_allow_html=True)
+                st.markdown(textwrap.dedent(f"""
+                <div class="ai-response">
+                    <div class="ai-badge">⚡ Computed Analytics Response</div>
+                    {metric_html}
+                    <div class="ai-answer-text">{clean_answer}</div>
+                    <div class="ai-context">Records analyzed: {record_count} · Operation: {operation}</div>
+                </div>
+                """), unsafe_allow_html=True)
 
-            with st.expander("🔧 Query Plan (LLM → Pydantic Validated JSON)", expanded=False):
-                st.json(plan)
+                with st.expander("🔧 Query Plan (LLM → Pydantic Validated JSON)", expanded=False):
+                    st.json(plan)
 
-            if evidence:
-                render_section(f"Supporting Evidence ({len(evidence)} records)")
-                df_ev = pd.DataFrame(evidence)
-                st.dataframe(df_ev, use_container_width=True, height=320)
+                if evidence:
+                    render_section(f"Supporting Evidence ({len(evidence)} records)")
+                    df_ev = pd.DataFrame(evidence)
+                    st.dataframe(df_ev, use_container_width=True, height=320)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
